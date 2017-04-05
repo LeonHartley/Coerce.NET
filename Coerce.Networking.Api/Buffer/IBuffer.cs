@@ -6,6 +6,8 @@ namespace Coerce.Networking.Api.Buffer
 {
     public interface IBuffer
     {
-        IBufferAllocator Free();
+        void WriteBytes(byte[] bytes);
+
+        void Dispose(IBufferAllocator allocator);
     }
 }

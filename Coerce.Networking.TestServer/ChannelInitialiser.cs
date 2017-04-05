@@ -4,29 +4,32 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Coerce.Networking.Api.Context.Channels;
+using Coerce.Commons.Logging;
 
 namespace Coerce.Networking.TestServer
 {
     class ChannelHandler : IChannelHandler
     {
+        private static readonly Logger _log = LoggerService.Instance.Create(nameof(ChannelHandler));
+
         public void OnChannelConnected(ChannelHandlerContext context)
         {
-            Console.WriteLine("A channel connected");
+            _log.Debug("A channel connected");
         }
 
         public void OnChannelDisconnected(ChannelHandlerContext context)
         {
-            Console.WriteLine("A channel disconnected");
+            _log.Debug("A channel disconnected");
         }
 
         public void OnChannelEvent(ChannelEvent triggeredEvent, ChannelHandlerContext context)
-        { 
-            Console.WriteLine("A channel event was triggered");
+        {
+            _log.Debug("A channel event was triggered");
         }
 
         public void OnChannelException(Exception exception, ChannelHandlerContext context)
         {
-            Console.WriteLine("A channel exception was caught: {0}", exception);  
+            _log.Error("A channel exception was caught {0}", exception);
         }
     }
 

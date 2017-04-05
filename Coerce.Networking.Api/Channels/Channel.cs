@@ -9,7 +9,7 @@ namespace Coerce.Networking.Api.Channels
 {
     public abstract class Channel
     {
-        private NetworkingPipeline _pipeline;
+        private NetworkingPipeline _pipeline = new NetworkingPipeline();
 
         public NetworkingPipeline Pipeline
         {
@@ -19,7 +19,17 @@ namespace Coerce.Networking.Api.Channels
             }
         }
 
-        abstract public void Write(IBuffer buffer);
+        public string IpAddress
+        {
+            get
+            {
+                return this.GetIpAddress();
+            }
+        }
+
+        public abstract void Write(IBuffer buffer);
+
+        protected abstract string GetIpAddress();
 
         public void FireEvent(ChannelEvent channelEvent)
         {

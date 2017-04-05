@@ -6,6 +6,8 @@ namespace Coerce.Networking.Api.Buffer
 {
     public interface IBufferAllocator
     {
+        IBuffer Alloc(int size);
 
+        void Dealloc(IBuffer buffer);
     }
 }

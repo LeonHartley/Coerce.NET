@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.Text;
 using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Api.Context;
+using Coerce.Commons.Logging;
 
 namespace Coerce.Networking.Core
 {
     public class CoreNetworkingService : INetworkingService
     {
         private IChannelInitialiser _channelInitialiser;
+
+        private Logger _log = LoggerService.Instance.Create(nameof(CoreNetworkingService));
 
         private String _hostName;
         private int _port;
