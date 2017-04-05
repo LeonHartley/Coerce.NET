@@ -36,7 +36,7 @@ namespace Coerce.Networking.Core
                 throw new InvalidOperationException("Invalid host name detected, a valid IP address is required");
             }
 
-            this._serverSocket = new AsyncServerSocket(new IPEndPoint(ipAddress, port));
+            this._serverSocket = new AsyncServerSocket(new IPEndPoint(ipAddress, port), this._channelInitialiser);
 
             this._serverSocket.Listen();
 

@@ -32,9 +32,12 @@ namespace Coerce.Networking.Core.Sockets
 
         private int _channelIdIndex = 0;
 
-        public AsyncServerSocket(IPEndPoint listenEndpoint)
+        private IChannelInitialiser _channelInitialiser;
+
+        public AsyncServerSocket(IPEndPoint listenEndpoint, IChannelInitialiser channelInitialiser)
         {
             this._listenEndpoint = listenEndpoint;
+            this._channelInitialiser = channelInitialiser;
 
             this._bufferAllocator = new BufferAllocator();
 
@@ -66,8 +69,12 @@ namespace Coerce.Networking.Core.Sockets
 
             receiveArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
 
-            receiveArgs.UserToken = new CoreChannel(this._channelIdIndex++, this, sendArgs);
+            Channel channel = new CoreChannel(this._channelIdIndex++, this, sendArgs);
+
+            receiveArgs.UserToken = channel;
             sendArgs.UserToken = new SendDataToken(receiveArgs.UserToken as Channel);
+
+            this._channelInitialiser.InitialiseChannel(channel);
 
             return receiveArgs;
         }

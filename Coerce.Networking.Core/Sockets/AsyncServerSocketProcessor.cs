@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System;
 using System.Text;
+using Coerce.Networking.Api.Context.Channels;
+using Coerce.Networking.Api.Channels;
 
 namespace Coerce.Networking.Core.Sockets
 {
@@ -29,12 +31,16 @@ namespace Coerce.Networking.Core.Sockets
                 acceptEventArgs.AcceptSocket = null;
                 this._acceptArgsPool.Return(acceptEventArgs);
 
+                channel.Pipeline.OnChannelConnected(new ChannelHandlerContext(channel));
+
                 StartReceive(ioArgs);
             }
         }
 
         private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
+            Channel channel = receiveEventArgs.UserToken as Channel;
+
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
                 byte[] dataReceived = new byte[receiveEventArgs.BytesTransferred];
@@ -49,6 +55,9 @@ namespace Coerce.Networking.Core.Sockets
             {
                 // Disconnect socket!
                 _log.Trace("Client socket closed");
+
+                channel.Pipeline.OnChannelDisconnected(new ChannelHandlerContext(channel));
+
                 this.CancelReceive(receiveEventArgs);
             }
         }
