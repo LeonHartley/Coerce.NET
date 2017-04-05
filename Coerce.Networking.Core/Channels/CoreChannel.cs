@@ -25,7 +25,7 @@ namespace Coerce.Networking.Core.Channels
         /// <param name="buffer">The buffer in which to write to the channel</param>
         public override void Write(IBuffer buffer)
         {
-            this.WriterQueue.Enqueue(buffer)
+            this.WriterQueue.Enqueue(buffer);
         }
 
         /// <summary>

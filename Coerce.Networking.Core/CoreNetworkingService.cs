@@ -5,6 +5,8 @@ using System.Text;
 using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Api.Context;
 using Coerce.Commons.Logging;
+using Coerce.Networking.Core.Sockets;
+using System.Net;
 
 namespace Coerce.Networking.Core
 {
@@ -17,6 +19,8 @@ namespace Coerce.Networking.Core
         private String _hostName;
         private int _port;
 
+        private AsyncServerSocket _serverSocket;
+
         public void Configure(IChannelInitialiser channelInitialiser)
         {
             this._channelInitialiser = channelInitialiser;
@@ -26,6 +30,15 @@ namespace Coerce.Networking.Core
         {
             this._hostName = hostName;
             this._port = port;
+
+            if (!IPAddress.TryParse(this._hostName, out IPAddress ipAddress))
+            {
+                throw new InvalidOperationException("Invalid host name detected, a valid IP address is required");
+            }
+
+            this._serverSocket = new AsyncServerSocket(new IPEndPoint(ipAddress, port));
+
+            this._serverSocket.Listen();
 
             onServiceInitialised.Invoke(new ServiceInitialisedContext(this));
         }

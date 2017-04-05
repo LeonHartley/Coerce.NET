@@ -8,10 +8,9 @@ namespace Coerce.Networking.Core.Sockets
 {
     class SocketAsyncEventArgsPool : QueuedObjectPool<SocketAsyncEventArgs>
     {
-        protected override SocketAsyncEventArgs Create()
+        public SocketAsyncEventArgsPool(int size, Func<SocketAsyncEventArgs> creator)
         {
-            // Create async args
-            return null;
+            this.Initialise(size, size, creator);
         }
     }
 }

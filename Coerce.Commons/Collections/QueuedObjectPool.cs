@@ -10,12 +10,16 @@ namespace Coerce.Commons.Collections
         private Boolean _closed;
         private int _size;
         private int _maxFreeObjects;
+
+        private Func<T> _creator;
         
-        protected void Initialise(int size, int maxFreeObjects)
+        protected void Initialise(int size, int maxFreeObjects, Func<T> createFunc)
         {
             this._size = size;
             this._maxFreeObjects = maxFreeObjects;
             this._objectQueue = new Queue<T>(size);
+
+            this._creator = createFunc;
         }
 
         public virtual bool Return(T value)
@@ -49,7 +53,7 @@ namespace Coerce.Commons.Collections
         {
             for(int i = 0; i < _size; i++)
             {
-                this._objectQueue.Enqueue(Create());
+                this._objectQueue.Enqueue(this._creator.Invoke());
             }
         }
 
@@ -69,8 +73,6 @@ namespace Coerce.Commons.Collections
                 this._closed = true;
             }
         }
-
-        protected abstract T Create();
 
         protected virtual void CleanupItem(T item)
         {
