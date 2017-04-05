@@ -42,7 +42,9 @@ namespace Coerce.Networking.Core.Sockets
                 System.Buffer.BlockCopy(receiveEventArgs.Buffer, receiveEventArgs.Offset, dataReceived, 0, receiveEventArgs.BytesTransferred);
 
                 _log.Trace("Received buffer {0}", Encoding.UTF8.GetString(dataReceived));
-            } 
+
+                this.StartReceive(receiveEventArgs);
+            }
             else
             {
                 // Disconnect socket!

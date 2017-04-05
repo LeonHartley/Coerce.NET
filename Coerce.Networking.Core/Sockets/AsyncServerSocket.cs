@@ -100,7 +100,7 @@ namespace Coerce.Networking.Core.Sockets
 
         public void CancelReceive(SocketAsyncEventArgs receiveEventArgs)
         {
-            this._acceptArgsPool.Return(receiveEventArgs);
+            this._ioArgsPool.Return(receiveEventArgs);
         }
     }
 }
