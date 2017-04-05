@@ -9,7 +9,21 @@ namespace Coerce.Networking.Api.Channels
 {
     public abstract class Channel
     {
+        private int _id;
         private NetworkingPipeline _pipeline = new NetworkingPipeline();
+
+        public int Id
+        {
+            get
+            {
+                return this._id;
+            }
+
+            protected set
+            {
+                this._id = Id;
+            }
+        }
 
         public NetworkingPipeline Pipeline
         {

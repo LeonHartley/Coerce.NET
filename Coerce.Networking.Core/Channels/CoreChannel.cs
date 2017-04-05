@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Coerce.Networking.Api.Buffer;
+using System.Net.Sockets;
+using Coerce.Networking.Core.Sockets;
 
 namespace Coerce.Networking.Core.Channels
 {
@@ -18,6 +20,33 @@ namespace Coerce.Networking.Core.Channels
         /// buffers will be queued until the next write operation is initiated.
         /// </summary>
         private Queue<IBuffer> WriterQueue { get; set; }
+
+        /// <summary>
+        /// The socket which this Channel instance is connected to
+        /// </summary>
+        public Socket Socket { get; set; }
+        
+        /// <summary>
+        /// The main server socket instance
+        /// </summary>
+        public AsyncServerSocket ServerSocket { get; set; }
+
+        /// <summary>
+        /// The asynchronous event to be used for sending data to the channel
+        /// </summary>
+        public SocketAsyncEventArgs SendArgs { get; set; }
+
+        /// <summary>
+        /// Creates a channel instance
+        /// </summary>
+        /// <param name="channelId">The ID of the channel</param>
+        /// <param name="sendEventArgs">The args used to send args</param>
+        public CoreChannel(int channelId, AsyncServerSocket serverSocket, SocketAsyncEventArgs sendEventArgs)
+        {
+            this.Id = channelId;
+            this.ServerSocket = serverSocket;
+            this.SendArgs = sendEventArgs;
+        }
 
         /// <summary>
         /// Writes to the channel

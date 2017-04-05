@@ -42,5 +42,10 @@ namespace Coerce.Networking.Core.Buffer
         {
             this._buffer = null;
         }
+
+        public byte[] Get()
+        {
+            return this._buffer;
+        }
     }
 }

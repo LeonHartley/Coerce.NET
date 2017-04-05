@@ -1,6 +1,8 @@
 ﻿using Coerce.Commons.Logging;
 using Coerce.Networking.Api.Buffer;
+using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Core.Buffer;
+using Coerce.Networking.Core.Channels;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -9,7 +11,7 @@ using System.Text;
 
 namespace Coerce.Networking.Core.Sockets
 {
-    class AsyncServerSocket
+    partial class AsyncServerSocket
     { 
         // todo: allow the default settings to be overriden
         private static readonly int ChannelBufferSize = 1024;
@@ -28,6 +30,8 @@ namespace Coerce.Networking.Core.Sockets
         private IPEndPoint _listenEndpoint;
         private Socket _listenSocket;
 
+        private int _channelIdIndex = 0;
+
         public AsyncServerSocket(IPEndPoint listenEndpoint)
         {
             this._listenEndpoint = listenEndpoint;
@@ -35,7 +39,7 @@ namespace Coerce.Networking.Core.Sockets
             this._bufferAllocator = new BufferAllocator();
 
             this._acceptArgsPool = new SocketAsyncEventArgsPool(MaxSimultaneousAcceptOperations, CreateAcceptEventArgs);
-            //this._ioArgsPool = new SocketAsyncEventArgsPool(MaxSimultaneousConnections, CreateIoEventArgs); 
+            this._ioArgsPool = new SocketAsyncEventArgsPool(MaxSimultaneousConnections, CreateIoEventArgs); 
         }
 
         public void Listen()
@@ -45,21 +49,6 @@ namespace Coerce.Networking.Core.Sockets
             this._listenSocket.Listen(ConnectionBacklog);
 
             this.StartAccept();
-        }
-
-        public void StartAccept()
-        {
-            SocketAsyncEventArgs acceptEventArgs = this._acceptArgsPool.Take();
-
-            if(acceptEventArgs != null)
-            {
-                bool eventPending = this._listenSocket.AcceptAsync(acceptEventArgs);
-
-                if(!eventPending)
-                {
-                    this.ProcessAccept(acceptEventArgs);
-                }
-            }
         }
 
         private SocketAsyncEventArgs CreateAcceptEventArgs()
@@ -72,19 +61,46 @@ namespace Coerce.Networking.Core.Sockets
 
         private SocketAsyncEventArgs CreateIoEventArgs()
         {
-            return null;
+            SocketAsyncEventArgs receiveArgs = CreateAcceptEventArgs();
+            SocketAsyncEventArgs sendArgs = CreateAcceptEventArgs();
+
+            receiveArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
+
+            receiveArgs.UserToken = new CoreChannel(this._channelIdIndex++, this, sendArgs);
+            sendArgs.UserToken = new SendDataToken(receiveArgs.UserToken as Channel);
+
+            return receiveArgs;
         }
 
         private void ProcessOperation(object sender, SocketAsyncEventArgs e)
         {
             _log.Trace("Processing operation {0}", e.LastOperation);
+
+            switch (e.LastOperation)
+            {
+                case SocketAsyncOperation.Accept:
+                    ProcessAccept(e);
+                    break;
+
+                case SocketAsyncOperation.Receive:
+                    ProcessReceive(e);
+                    break;
+
+                case SocketAsyncOperation.Send:
+                    ProcessSend(e);
+                    break;
+            }
         }
 
-        private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
+        public void CancelAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            this.StartAccept();
+            acceptEventArgs.AcceptSocket.Shutdown(SocketShutdown.Both);
+            this._acceptArgsPool.Return(acceptEventArgs);
+        }
 
-            _log.Trace("Channel accepted");
+        public void CancelReceive(SocketAsyncEventArgs receiveEventArgs)
+        {
+            this._acceptArgsPool.Return(receiveEventArgs);
         }
     }
 }
