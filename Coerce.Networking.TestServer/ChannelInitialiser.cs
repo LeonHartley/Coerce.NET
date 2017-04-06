@@ -5,13 +5,15 @@ using System.Collections.Generic;
 using System.Text;
 using Coerce.Networking.Api.Context.Channels;
 using Coerce.Commons.Logging;
+using Coerce.Networking.Api.Buffer;
+using Coerce.Networking.Api.Buffer.Default;
 
 namespace Coerce.Networking.TestServer
 {
     class ChannelHandler : IChannelHandler
     {
         private static readonly Logger _log = LoggerService.Instance.Create(nameof(ChannelHandler));
-
+        
         public void OnChannelConnected(ChannelHandlerContext context)
         {
             _log.Debug("A channel connected");

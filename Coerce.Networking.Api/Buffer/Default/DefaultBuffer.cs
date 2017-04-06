@@ -1,17 +1,20 @@
 ﻿using System;
-using Coerce.Networking.Api.Buffer;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Coerce.Networking.Core.Buffer
+namespace Coerce.Networking.Api.Buffer.Default
 {
-    class Buffer : IBuffer
+    class DefaultBuffer : IBuffer
     {
         private byte[] _buffer;
         private int _size;
 
+        private readonly int _offset;
+
         private int _writerIndex;
         private int _readerIndex;
 
-        public Buffer(byte[] buffer, int size)
+        public DefaultBuffer(byte[] buffer, int size, int offset)
         {
             this._buffer = buffer;
             this._size = size;
@@ -19,9 +22,9 @@ namespace Coerce.Networking.Core.Buffer
 
         public void WriteBytes(byte[] bytes)
         {
-            for(int i = 0; i < bytes.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
-                this._buffer[this._writerIndex++] = bytes[i];
+                this._buffer[this._offset + this._writerIndex++] = bytes[i];
             }
         }
 
@@ -32,9 +35,9 @@ namespace Coerce.Networking.Core.Buffer
 
         public void WriteBytes(int offset, byte[] bytes)
         {
-            for(int i = 0; i < bytes.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
-                this._buffer[offset++] = bytes[i];
+                this._buffer[this._offset + offset++] = bytes[i];
             }
         }
 
@@ -51,6 +54,14 @@ namespace Coerce.Networking.Core.Buffer
         public int GetLength()
         {
             return this._writerIndex;
+        }
+
+        public int Offset
+        {
+            get
+            {
+                return this._offset;
+            }
         }
     }
 }

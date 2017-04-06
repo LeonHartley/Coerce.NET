@@ -1,7 +1,7 @@
 ﻿using Coerce.Commons.Logging;
 using Coerce.Networking.Api.Buffer;
+using Coerce.Networking.Api.Buffer.Default;
 using Coerce.Networking.Api.Channels;
-using Coerce.Networking.Core.Buffer;
 using Coerce.Networking.Core.Channels;
 using System;
 using System.Collections.Generic;
@@ -39,7 +39,7 @@ namespace Coerce.Networking.Core.Sockets
             this._listenEndpoint = listenEndpoint;
             this._channelInitialiser = channelInitialiser;
 
-            this._bufferAllocator = new BufferAllocator();
+            this._bufferAllocator = new PooledBufferAllocator(MaxSimultaneousConnections * 2, ChannelBufferSize);
 
             this._acceptArgsPool = new SocketAsyncEventArgsPool(MaxSimultaneousAcceptOperations, CreateAcceptEventArgs);
             this._ioArgsPool = new SocketAsyncEventArgsPool(MaxSimultaneousConnections, CreateIoEventArgs); 
@@ -67,8 +67,17 @@ namespace Coerce.Networking.Core.Sockets
             SocketAsyncEventArgs receiveArgs = CreateAcceptEventArgs();
             SocketAsyncEventArgs sendArgs = CreateAcceptEventArgs();
 
-            receiveArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
-            sendArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
+            IBuffer receiveBuffer = null;
+            IBuffer sendBuffer = null;
+
+            if(!this._bufferAllocator.Alloc(ChannelBufferSize, out receiveBuffer) || !this._bufferAllocator.Alloc(ChannelBufferSize, out sendBuffer))
+            {
+                // Failed to allocate buffers!
+                throw new InvalidOperationException("Failed to allocate send & receive buffers");
+            }
+
+            receiveArgs.SetBuffer(receiveBuffer.Get(), 0, ChannelBufferSize);
+            sendArgs.SetBuffer(sendBuffer.Get(), 0, ChannelBufferSize);
 
             Channel channel = new CoreChannel(this._channelIdIndex++, this, sendArgs);
             ChannelToken channelToken = new ChannelToken(channel, new DataWriter());
