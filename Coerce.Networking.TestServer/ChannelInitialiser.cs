@@ -1,12 +1,12 @@
 ﻿using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Api.Pipeline.Handlers;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Coerce.Networking.Api.Context.Channels;
 using Coerce.Commons.Logging;
 using Coerce.Networking.Api.Buffer;
 using Coerce.Networking.Api.Buffer.Default;
+using System.Threading;
 
 namespace Coerce.Networking.TestServer
 {
@@ -21,6 +21,8 @@ namespace Coerce.Networking.TestServer
 
         public void OnChannelDataReceived(IBuffer buffer, ChannelHandlerContext context)
         {
+            _log.Debug("Thread: {0}", Thread.CurrentThread.ManagedThreadId);
+
             if (UnpooledBufferAllocator.Instance.Alloc(1024, out IBuffer sendBuf))
             {
                 sendBuf.WriteBytes(Encoding.UTF8.GetBytes(

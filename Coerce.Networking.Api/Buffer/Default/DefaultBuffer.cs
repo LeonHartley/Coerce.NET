@@ -18,6 +18,7 @@ namespace Coerce.Networking.Api.Buffer.Default
         {
             this._buffer = buffer;
             this._size = size;
+            this._offset = offset;
         }
 
         public void WriteBytes(byte[] bytes)
@@ -59,6 +60,21 @@ namespace Coerce.Networking.Api.Buffer.Default
         public bool IsReadable()
         {
             return this._readerIndex < this._size;
+        }
+
+        public void ResetReadability()
+        {
+            this._readerIndex = 0;
+        }
+
+        public bool IsWritable()
+        {
+            return this._writerIndex < this._size;
+        }
+
+        public void ResetWritability()
+        {
+            this._writerIndex = 0;
         }
 
         public int Offset

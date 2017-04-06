@@ -15,5 +15,11 @@ namespace Coerce.Networking.Api.Buffer
         int GetLength();
 
         bool IsReadable();
+
+        void ResetReadability();
+
+        bool IsWritable();
+
+        void ResetWritability();
     }
 }
