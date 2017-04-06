@@ -79,7 +79,7 @@ namespace Coerce.Networking.Core.Sockets
             receiveArgs.SetBuffer(receiveBuffer.Get(), 0, ChannelBufferSize);
             sendArgs.SetBuffer(sendBuffer.Get(), 0, ChannelBufferSize);
 
-            Channel channel = new CoreChannel(this._channelIdIndex++, this, sendArgs);
+            Channel channel = new DefaultChannel(this._channelIdIndex++, this, sendArgs);
             ChannelToken channelToken = new ChannelToken(channel, new DataWriter());
 
             receiveArgs.UserToken = channelToken;

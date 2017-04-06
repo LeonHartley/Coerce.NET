@@ -7,21 +7,47 @@ using Coerce.Commons.Logging;
 using Coerce.Networking.Api.Buffer;
 using Coerce.Networking.Api.Buffer.Default;
 using System.Threading;
+using Coerce.Networking.Api.Channels.Default;
+using Coerce.Networking.Api.Channels.Attachments;
 
 namespace Coerce.Networking.TestServer
 {
+    class TestAttachment
+    {
+        public string Data
+        {
+            get;
+            private set;
+        }
+
+        public TestAttachment(string data)
+        {
+            this.Data = data;
+        }
+    }
+
     class ChannelHandler : IChannelHandler
     {
         private static readonly Logger _log = LoggerService.Instance.Create(nameof(ChannelHandler));
-        
+
+        private static readonly ChannelAttachmentKey<TestAttachment> TestAttachmentKey = new ChannelAttachmentKey<TestAttachment>("TestAttachment");
+
         public void OnChannelConnected(ChannelHandlerContext context)
         {
+            if (context.Channel.Attachments.Set(TestAttachmentKey, new TestAttachment("It works!")))
+            {
+                _log.Debug("Attachment was created & set");
+            }
+
             _log.Debug("A channel connected");
         }
 
         public void OnChannelDataReceived(IBuffer buffer, ChannelHandlerContext context)
         {
-            _log.Debug("Thread: {0}", Thread.CurrentThread.ManagedThreadId);
+            if (context.Channel.Attachments.Get(TestAttachmentKey, out TestAttachment attachment))
+            {
+                _log.Debug("We have our attachment {0}", attachment.Data);
+            }
 
             if (UnpooledBufferAllocator.Instance.Alloc(1024, out IBuffer sendBuf))
             {
@@ -36,8 +62,6 @@ namespace Coerce.Networking.TestServer
                     "send buffer test"));
 
                 context.Channel.Write(sendBuf);
-
-                // todo: close connection when send operation is complete
             }
         }
 
@@ -48,7 +72,12 @@ namespace Coerce.Networking.TestServer
 
         public void OnChannelEvent(ChannelEvent triggeredEvent, ChannelHandlerContext context)
         {
-            _log.Debug("A channel event was triggered");
+            if(triggeredEvent is ChannelFlushComplete)
+            {
+                // Close the connection once data has been written.
+                context.Channel.Close();
+                triggeredEvent.SetCompleted(true);
+            }
         }
 
         public void OnChannelException(Exception exception, ChannelHandlerContext context)

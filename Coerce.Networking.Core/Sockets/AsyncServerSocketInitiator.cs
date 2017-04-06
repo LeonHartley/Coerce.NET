@@ -32,7 +32,7 @@ namespace Coerce.Networking.Core.Sockets
         /// <param name="receiveArgs">The data which specifies who's receiving what data</param>
         public void StartReceive(SocketAsyncEventArgs receiveArgs)
         {
-            CoreChannel channel = (receiveArgs.UserToken as ChannelToken).Channel as CoreChannel;
+            DefaultChannel channel = (receiveArgs.UserToken as ChannelToken).Channel as DefaultChannel;
 
             bool eventPending = channel.Socket.ReceiveAsync(receiveArgs);
 
