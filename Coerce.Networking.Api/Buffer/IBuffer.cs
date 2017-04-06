@@ -13,5 +13,7 @@ namespace Coerce.Networking.Api.Buffer
         byte[] Get();
 
         int GetLength();
+
+        bool IsReadable();
     }
 }

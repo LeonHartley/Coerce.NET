@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Coerce.Networking.Api.Buffer.Default
 {
-    class DefaultBuffer : IBuffer
+    public class DefaultBuffer : IBuffer
     {
         private byte[] _buffer;
         private int _size;
@@ -54,6 +54,11 @@ namespace Coerce.Networking.Api.Buffer.Default
         public int GetLength()
         {
             return this._writerIndex;
+        }
+
+        public bool IsReadable()
+        {
+            return this._readerIndex < this._size;
         }
 
         public int Offset

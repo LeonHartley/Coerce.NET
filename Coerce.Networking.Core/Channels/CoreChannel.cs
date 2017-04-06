@@ -93,6 +93,7 @@ namespace Coerce.Networking.Core.Channels
         /// </summary>
         public void OnFlushComplete()
         {
+            this.Socket.Shutdown(SocketShutdown.Both);
             this.BeginFlush();
         }
 

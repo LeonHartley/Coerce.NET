@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Api.Context.Channels;
 using System;
+using Coerce.Networking.Api.Buffer;
 
 namespace Coerce.Networking.Api.Pipeline
 {
@@ -62,6 +63,19 @@ namespace Coerce.Networking.Api.Pipeline
             foreach (IChannelHandler channelhander in this._activeHandlers.Values)
             {
                 channelhander.OnChannelException(exception, context);
+            }
+        }
+
+        public void OnChannelDataReceived(IBuffer buffer, ChannelHandlerContext context)
+        {
+            foreach (IChannelHandler channelhander in this._activeHandlers.Values)
+            {
+                if(!buffer.IsReadable())
+                {
+                    break;
+                }
+
+                channelhander.OnChannelDataReceived(buffer, context);
             }
         }
     }

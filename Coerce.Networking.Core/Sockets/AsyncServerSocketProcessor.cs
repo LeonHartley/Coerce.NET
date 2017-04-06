@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using Coerce.Networking.Api.Context.Channels;
 using Coerce.Networking.Api.Buffer;
+using Coerce.Networking.Api.Buffer.Default;
 
 namespace Coerce.Networking.Core.Sockets
 {
@@ -31,10 +32,10 @@ namespace Coerce.Networking.Core.Sockets
 
                 acceptEventArgs.AcceptSocket = null;
                 this._acceptArgsPool.Return(acceptEventArgs);
+            
+                StartReceive(ioArgs);
 
                 channel.Pipeline.OnChannelConnected(new ChannelHandlerContext(channel));
-
-                StartReceive(ioArgs);
             }
         }
 
@@ -49,6 +50,10 @@ namespace Coerce.Networking.Core.Sockets
                 System.Buffer.BlockCopy(receiveEventArgs.Buffer, receiveEventArgs.Offset, dataReceived, 0, receiveEventArgs.BytesTransferred);
 
                 _log.Trace("Received buffer {0}", Encoding.UTF8.GetString(dataReceived));
+
+                channelToken.Channel.Pipeline.OnChannelDataReceived(
+                    new DefaultBuffer(dataReceived, dataReceived.Length, 0),
+                    new ChannelHandlerContext(channelToken.Channel));
 
                 this.StartReceive(receiveEventArgs);
             }

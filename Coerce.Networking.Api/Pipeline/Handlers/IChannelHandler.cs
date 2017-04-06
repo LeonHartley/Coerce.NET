@@ -1,4 +1,5 @@
-﻿using Coerce.Networking.Api.Channels;
+﻿using Coerce.Networking.Api.Buffer;
+using Coerce.Networking.Api.Channels;
 using Coerce.Networking.Api.Context.Channels;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace Coerce.Networking.Api.Pipeline.Handlers
         void OnChannelConnected(ChannelHandlerContext context);
 
         void OnChannelDisconnected(ChannelHandlerContext context);
+
+        void OnChannelDataReceived(IBuffer buffer, ChannelHandlerContext context);
 
         void OnChannelEvent(ChannelEvent triggeredEvent, ChannelHandlerContext context);
 

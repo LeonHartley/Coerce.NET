@@ -53,7 +53,7 @@ namespace Coerce.Networking.Core.Sockets
 
             flushArgs.SetBuffer(flushArgs.Offset, dataToFlush);
             
-            System.Buffer.BlockCopy(
+            Buffer.BlockCopy(
                 channelToken.DataWriter.Data,
                 channelToken.DataWriter.DataProcessed,
                 flushArgs.Buffer,
