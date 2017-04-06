@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System;
 using System.Text;
 using Coerce.Networking.Api.Context.Channels;
-using Coerce.Networking.Api.Channels;
+using Coerce.Networking.Api.Buffer;
 
 namespace Coerce.Networking.Core.Sockets
 {
@@ -23,10 +23,11 @@ namespace Coerce.Networking.Core.Sockets
             
             if(ioArgs != null)
             {
-                CoreChannel channel = ioArgs.UserToken as CoreChannel;
+                ChannelToken channelToken = ioArgs.UserToken as ChannelToken;
+                CoreChannel channel = channelToken.Channel as CoreChannel;
 
                 channel.Socket = acceptEventArgs.AcceptSocket;
-                channel.SendArgs.AcceptSocket = channel.Socket;
+                channel.SendArgs.AcceptSocket = acceptEventArgs.AcceptSocket;
 
                 acceptEventArgs.AcceptSocket = null;
                 this._acceptArgsPool.Return(acceptEventArgs);
@@ -39,7 +40,7 @@ namespace Coerce.Networking.Core.Sockets
 
         private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
-            Channel channel = receiveEventArgs.UserToken as Channel;
+            ChannelToken channelToken = receiveEventArgs.UserToken as ChannelToken;
 
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
@@ -56,15 +57,32 @@ namespace Coerce.Networking.Core.Sockets
                 // Disconnect socket!
                 _log.Trace("Client socket closed");
 
-                channel.Pipeline.OnChannelDisconnected(new ChannelHandlerContext(channel));
+                channelToken.Channel.Pipeline.OnChannelDisconnected(new ChannelHandlerContext(channelToken.Channel));
 
                 this.CancelReceive(receiveEventArgs);
             }
         }
-        
-        private void ProcessSend(SocketAsyncEventArgs acceptEventArgs)
+
+        private void ProcessFlush(SocketAsyncEventArgs flushArgs)
         {
-            _log.Trace("Processing send operation");
+            ChannelToken channelToken = flushArgs.UserToken as ChannelToken;
+
+            // We're ready to send
+            if (flushArgs.SocketError == SocketError.Success)
+            {
+                channelToken.DataWriter.DataRemaining = channelToken.DataWriter.DataRemaining - flushArgs.BytesTransferred;
+
+                if (channelToken.DataWriter.DataRemaining == 0)
+                {
+                    channelToken.DataWriter.Reset();
+                    (channelToken.Channel as CoreChannel).OnFlushComplete();
+                }
+                else
+                {
+                    channelToken.DataWriter.DataProcessed += flushArgs.BytesTransferred;
+                    this.StartFlush(flushArgs);
+                }
+            }
         }
     }
 }

@@ -5,13 +5,8 @@ using System.Text;
 
 namespace Coerce.Networking.Core.Sockets
 {
-    class SendDataToken
+    class DataWriter
     {
-        public Channel Channel
-        {
-            get; set;
-        }
-
         public int DataRemaining
         {
             get; set;
@@ -27,9 +22,8 @@ namespace Coerce.Networking.Core.Sockets
             get; set;
         }
 
-        public SendDataToken(Channel channel)
+        public DataWriter()
         {
-            this.Channel = channel;
             this.DataRemaining = 0;
             this.DataProcessed = 0;
             this.Data = null;

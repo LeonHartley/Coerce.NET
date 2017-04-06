@@ -68,11 +68,13 @@ namespace Coerce.Networking.Core.Sockets
             SocketAsyncEventArgs sendArgs = CreateAcceptEventArgs();
 
             receiveArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
+            sendArgs.SetBuffer(this._bufferAllocator.Alloc(ChannelBufferSize).Get(), 0, ChannelBufferSize);
 
             Channel channel = new CoreChannel(this._channelIdIndex++, this, sendArgs);
+            ChannelToken channelToken = new ChannelToken(channel, new DataWriter());
 
-            receiveArgs.UserToken = channel;
-            sendArgs.UserToken = new SendDataToken(receiveArgs.UserToken as Channel);
+            receiveArgs.UserToken = channelToken;
+            sendArgs.UserToken = channelToken;
 
             this._channelInitialiser.InitialiseChannel(channel);
 
@@ -94,7 +96,7 @@ namespace Coerce.Networking.Core.Sockets
                     break;
 
                 case SocketAsyncOperation.Send:
-                    ProcessSend(e);
+                    ProcessFlush(e);
                     break;
             }
         }

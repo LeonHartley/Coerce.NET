@@ -47,5 +47,10 @@ namespace Coerce.Networking.Core.Buffer
         {
             return this._buffer;
         }
+
+        public int GetLength()
+        {
+            return this._writerIndex;
+        }
     }
 }

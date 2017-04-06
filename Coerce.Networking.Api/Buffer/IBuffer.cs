@@ -11,5 +11,7 @@ namespace Coerce.Networking.Api.Buffer
         void Dispose(IBufferAllocator allocator);
 
         byte[] Get();
+
+        int GetLength();
     }
 }

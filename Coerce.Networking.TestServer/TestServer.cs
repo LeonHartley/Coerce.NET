@@ -36,7 +36,11 @@ namespace Coerce.Networking.TestServer
             this._networkingService.Start(this._host, this._port, (ctx) =>
             {
                 this._log.Info("Server listening on tcp://{0}:{1}", this._host, this._port);
-                Console.ReadKey();
+                
+                while(true)
+                {
+                    string command = Console.ReadLine();
+                }
             });
         }
     }
